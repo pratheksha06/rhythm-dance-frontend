@@ -1,145 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-// Comprehensive dataset with corresponding instructors, full details, and optimized live imagery
-const programData = [
-  { 
-    id: 1, 
-    name: 'Hip Hop', 
-    text: 'Learn powerful hip hop moves, freestyle techniques, and stage performance.', 
-    img: 'https://i.pinimg.com/736x/57/64/d3/5764d37e09a07b024613a05368a98738.jpg',
-    details: 'Master foundational bounce, body isolations, complex routine transitions, and freestyle battle dynamics. This course focuses heavily on street authenticity and musical syncopation.',
-    instructor: { name: 'Marcus "Wave" Carter', experience: '8+ Years', bio: 'Former back-up dancer for elite global artists and specialist in pop-and-lock mechanics.' }
-  },
-  { 
-    id: 2, 
-    name: 'Ballet', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?q=80&w=600',
-    details: 'Develop absolute alignment, point technique, turn discipline, and classical storytelling grace. Perfect for building profound core stability and posture.',
-    instructor: { name: 'Elena Rostova', experience: '12+ Years', bio: 'Classically trained prima ballerina with extensive performance history in European theater tours.' }
-  },
-  { 
-    id: 3, 
-    name: 'Contemporary', 
-    text: 'Express emotions through modern contemporary choreography and movement.', 
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvcX0IJhW-3xZ5qv1bNwFceOreEWGXk26jeQ&s',
-    details: 'Express raw emotional narratives through fluid floor extensions, weight manipulation, and abstract kinetic breath control.',
-    instructor: { name: 'Sarah Jenkins', experience: '6+ Years', bio: 'Juilliard graduate specializing in modern expressive release techniques and spatial staging.' }
-  },
-  { 
-    id: 4, 
-    name: 'Jazz', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTivFgAmOWwpggVXLKAAvtID8kjgsgY2uJHw&s',
-    details: 'Blend explosive syncopations, dramatic leaps, turns, and broad commercial showmanship styles into high-velocity routines.',
-    instructor: { name: 'David Vance', experience: '9+ Years', bio: 'Broadway theater veteran passionate about classic jazz rhythms and high-impact stage presence.' }
-  },
-  { 
-    id: 5, 
-    name: 'Salsa', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=600',
-    details: 'Lock into fast-paced Latin syncopation steps, dynamic multi-directional partner spins, and authentic timing patterns.',
-    instructor: { name: 'Carlos & Sofia', experience: '10+ Years Duo', bio: 'International Latin Congress champions dedicated to authentic timing, leading, and following.' }
-  },
-  { 
-    id: 6, 
-    name: 'K-Pop', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=600',
-    details: 'Learn official high-energy dynamic configurations, facial performance rules, and sharp team synchronization routines directly from current global hits.',
-    instructor: { name: 'Ji-Min Park', experience: '5+ Years', bio: 'Seoul agency background training prospective idols in hyper-synchronized formation routines.' }
-  },
-  { 
-    id: 7, 
-    name: 'Break dance', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=600',
-    details: 'Build gravity-defying athletic conditioning. Master power-moves, floor footwork patterns, spins, freezes, and drops safely.',
-    instructor: { name: 'B-Boy Rush', experience: '11+ Years', bio: 'Red Bull BC One regional contender specializing in complex power-move combinations.' }
-  },
-  { 
-    id: 8, 
-    name: 'Traditional', 
-    text: 'Improve flexibility, grace, and classical dance fundamentals with expert trainers.', 
-    img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbioABgAwNhmN2GJqqyMymml6-UYnCi34w4g&s',
-    details: 'Connect deeply with structural heritage roots, exploring classical rhythmic folk syncopations, traditional postures, and cultural storytelling beats.',
-    instructor: { name: 'Amara Devi', experience: '15+ Years', bio: 'National heritage fellow specializing in classical regional storytelling and traditional mudras.' }
-  }
-];
 
 export default function Programs() {
   const navigate = useNavigate();
+  const [programs, setPrograms] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/classes')
+      .then(res => {
+        setPrograms(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div style={styles.center}>Loading elite dance styles...</div>;
 
   return (
     <div style={styles.container}>
-      <style>{`
-        .program-card { transition: all 0.3s ease; cursor: pointer; }
-        .program-card:hover { transform: translateY(-5px); border-color: #ff3c78 !important; box-shadow: 0 10px 20px rgba(255, 60, 120, 0.1); }
-        .modal-btn { transition: background 0.2s; }
-        .modal-close:hover { color: #ff3c78 !important; }
-      `}</style>
+      <h1 style={styles.mainTitle}>Explore Our <span style={{color: '#ff3c78'}}>Dance Programs</span></h1>
+      <p style={styles.subtitle}>Discover your rhythm with industry leading professional instructors</p>
 
-      <h2 style={styles.mainTitle}>Our Dance Programs</h2>
-      <p style={styles.subTitle}>Choose your favorite dance style and start your journey today.</p>
-      
       <div style={styles.grid}>
-        {programData.map((item) => (
-          <div 
-            key={item.id} 
-            className="program-card" 
-            style={styles.card}
-            onClick={() => setSelectedProgram(item)}
-          >
-            <div style={styles.imgWrapper}>
-              <img src={item.img} alt={item.name} style={styles.img} />
+        {programs.map((program) => {
+          // 1. SAFELY READ THE ADMIN LINK IN JAVASCRIPT BEFORE THE RETURN BLOCK
+          const cardImage = program.programImageUrl || 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500';
+          
+          return (
+            <div key={program._id || program.id} style={styles.card}>
+              {/* 2. PLACED BEAUTIFULLY INSIDE YOUR VISUAL LAYOUT ROUTE */}
+              <div style={{ ...styles.cardImage, backgroundImage: `url(${cardImage})` }} />
+              
+              <div style={styles.cardContent}>
+                <span style={styles.cardTag}>{program.danceStyle || 'Dance Discipline'}</span>
+                <h3 style={styles.cardTitle}>{program.className || 'Untitled Style'}</h3>
+                
+                {/* Truncated description field to prevent content boxes from skewing sizes */}
+                <p style={styles.cardDescription}>
+                  {program.description || 'No overview configured for this style yet.'}
+                </p>
+                
+                <button style={styles.learnMoreBtn} onClick={() => setSelectedProgram(program)}>
+                  Learn More &rarr;
+                </button>
+              </div>
             </div>
-            <div style={styles.content}>
-              <h3 style={styles.cardTitle}>{item.name}</h3>
-              <p style={styles.cardText}>{item.text}</p>
-              <div style={styles.learnMoreLink}>Learn More & Register ➜</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* INTERACTIVE COMPONENT MODAL OVERLAY */}
+      {/* Pop-up Details Modal Window */}
       {selectedProgram && (
         <div style={styles.modalOverlay} onClick={() => setSelectedProgram(null)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <span className="modal-close" style={styles.closeBtn} onClick={() => setSelectedProgram(null)}>✕</span>
-            
+            <div style={{ ...styles.modalImage, backgroundImage: `url(${selectedProgram.programImageUrl || 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600'})` }} />
             <div style={styles.modalBody}>
-              <img src={selectedProgram.img} alt={selectedProgram.name} style={styles.modalImg} />
-              
-              <div style={styles.modalInfoGrid}>
-                <div>
-                  <h3 style={styles.modalTitle}>{selectedProgram.name}</h3>
-                  <p style={styles.modalDetailsText}>{selectedProgram.details}</p>
-                </div>
+              <h2 style={styles.modalTitle}>{selectedProgram.className}</h2>
+              <p style={styles.modalText}>{selectedProgram.description}</p>
 
-                <div style={styles.instructorBox}>
-                  <h4 style={styles.instructorTitle}>Assigned Instructor</h4>
-                  <div style={{ fontWeight: '600', color: '#ff3c78', marginBottom: '4px' }}>{selectedProgram.instructor.name}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>Experience: {selectedProgram.instructor.experience}</div>
-                  <p style={{ fontSize: '13px', color: '#aaa', margin: 0, lineHeight: '1.4' }}>{selectedProgram.instructor.bio}</p>
-                </div>
+              <div style={styles.instructorBox}>
+                <p style={styles.insLabel}>ASSIGNED INSTRUCTOR</p>
+                <h3 style={styles.insName}>{selectedProgram.instructor?.name || 'Assigned Expert'}</h3>
+                <p style={styles.insExp}>{selectedProgram.instructorExperience || 'Experience: 10+ Years'}</p>
+                <p style={styles.insBio}>{selectedProgram.instructor?.bio || 'Professional residency performance specialist.'}</p>
               </div>
 
-              <div style={styles.modalFooter}>
-                <button style={styles.cancelBtn} onClick={() => setSelectedProgram(null)}>Back to Overview</button>
-                <button 
-                  className="modal-btn" 
-                  style={styles.registerBtn} 
-                  onClick={() => {
-                    localStorage.setItem('selectedClass', selectedProgram.name);
-                    navigate('/registration');
-                  }}
-                >
-                  Confirm & Register Now
-                </button>
+              <div style={styles.modalActions}>
+                <button style={styles.backBtn} onClick={() => setSelectedProgram(null)}>Back to Overview</button>
+                <button style={styles.registerBtn} onClick={() => navigate('/registration', { state: { selectedClass: selectedProgram } })}>Confirm & Register Now</button>
               </div>
             </div>
           </div>
@@ -150,30 +84,32 @@ export default function Programs() {
 }
 
 const styles = {
-  container: { padding: '40px 5% 80px', background: '#0a0a0a', color: 'white', minHeight: '100vh', fontFamily: "'Poppins', sans-serif" },
-  mainTitle: { fontSize: '36px', fontWeight: '700', textAlign: 'center', marginBottom: '10px', letterSpacing: '0.5px' },
-  subTitle: { fontSize: '14px', color: '#666', textAlign: 'center', marginBottom: '50px' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px', maxWidth: '1200px', margin: '0 auto' },
-  card: { background: '#141414', borderRadius: '16px', overflow: 'hidden', border: '1px solid #222', display: 'flex', flexDirection: 'column' },
-  imgWrapper: { width: '100%', height: '180px', background: '#1f1f1f' },
-  img: { width: '100%', height: '100%', objectFit: 'cover' },
-  content: { padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 },
-  cardTitle: { fontSize: '18px', fontWeight: '700', marginBottom: '8px', color: 'white' },
-  cardText: { fontSize: '13px', color: '#888', lineHeight: '1.5', marginBottom: '15px', flexGrow: 1 },
-  learnMoreLink: { fontSize: '13px', color: '#ff3c78', fontWeight: '600', marginTop: 'auto' },
+  container: { minHeight: '100vh', backgroundColor: '#0a0a0a', color: 'white', padding: '120px 5% 60px 5%', fontFamily: "'Poppins', sans-serif" },
+  mainTitle: { textAlign: 'center', fontSize: '36px', fontWeight: '700', margin: '0 0 10px 0' },
+  subtitle: { textAlign: 'center', color: '#aaa', fontSize: '15px', marginBottom: '50px' },
+  center: { minHeight: '100vh', backgroundColor: '#0a0a0a', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px', maxWidth: '1200px', margin: '0 auto' },
   
-  // MODAL LAYOUT BLUEPRINTS
-  modalOverlay: { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000, padding: '20px', boxSizing: 'border-box' },
-  modalContent: { background: '#111', borderRadius: '20px', width: '100%', maxWidth: '640px', border: '1px solid #282828', position: 'relative', overflow: 'hidden', animation: 'fadeIn 0.2s ease-out' },
-  closeBtn: { position: 'absolute', top: '15px', right: '20px', color: '#aaa', fontSize: '20px', cursor: 'pointer', zIndex: 10 },
-  modalBody: { display: 'flex', flexDirection: 'column' },
-  modalImg: { width: '100%', height: '240px', objectFit: 'cover', borderBottom: '1px solid #222' },
-  modalInfoGrid: { padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' },
-  modalTitle: { fontSize: '26px', fontWeight: '700', margin: '0 0 10px 0', color: 'white' },
-  modalDetailsText: { fontSize: '14px', color: '#aaa', lineHeight: '1.6', margin: 0 },
-  instructorBox: { background: '#161616', padding: '16px', borderRadius: '12px', border: '1px solid #222' },
-  instructorTitle: { fontSize: '14px', fontWeight: '600', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 8px 0' },
-  modalFooter: { padding: '0 30px 30px', display: 'flex', justifyContent: 'flex-end', gap: '12px' },
-  cancelBtn: { background: 'transparent', color: '#aaa', border: 'none', padding: '10px 15px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' },
-  registerBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }
+  card: { backgroundColor: '#141414', borderRadius: '15px', border: '1px solid #222', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '420px' },
+  cardImage: { height: '180px', minHeight: '180px', backgroundSize: 'cover', backgroundPosition: 'center', width: '100%' },
+  cardContent: { padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 },
+  cardTag: { color: '#ff3c78', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' },
+  cardTitle: { fontSize: '22px', fontWeight: '600', margin: '0 0 8px 0', color: '#fff' },
+  cardDescription: { color: '#aaa', fontSize: '13px', lineHeight: '1.5', margin: '0 0 15px 0', display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', height: '58px' },
+  learnMoreBtn: { background: 'none', border: 'none', color: '#fff', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: 0, marginTop: 'auto', textAlign: 'left', width: 'fit-content' },
+  
+  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
+  modalContent: { backgroundColor: '#141414', border: '1px solid #282828', width: '100%', maxWidth: '500px', borderRadius: '20px', overflow: 'hidden' },
+  modalImage: { height: '200px', backgroundSize: 'cover', backgroundPosition: 'center' },
+  modalBody: { padding: '25px', display: 'flex', flexDirection: 'column', gap: '15px' },
+  modalTitle: { fontSize: '26px', fontWeight: '700', margin: 0, textAlign: 'center' },
+  modalText: { color: '#ccc', fontSize: '14px', lineHeight: '1.6', margin: 0, textAlign: 'center' },
+  instructorBox: { backgroundColor: '#1c1c1c', border: '1px solid #2a2a2a', borderRadius: '12px', padding: '15px' },
+  insLabel: { color: '#666', fontSize: '10px', fontWeight: '700', textAlign: 'center', margin: '0 0 6px 0' },
+  insName: { color: '#ff3c78', fontSize: '18px', fontWeight: '600', textAlign: 'center', margin: '0 0 2px 0' },
+  insExp: { color: '#aaa', fontSize: '12px', textAlign: 'center', margin: '0 0 8px 0' },
+  insBio: { color: '#999', fontSize: '13px', textAlign: 'center', margin: 0, lineHeight: '1.4' },
+  modalActions: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' },
+  backBtn: { background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '14px' },
+  registerBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }
 };

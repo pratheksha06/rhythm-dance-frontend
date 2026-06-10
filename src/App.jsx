@@ -9,56 +9,86 @@ import FAQ from './pages/FAQ';
 import Registration from './pages/Registration';
 import Instructors from './pages/Instructors';
 import AdminDashboard from './pages/AdminDashboard';
-
-// --- NEW INDIVIDUAL POLICY IMPORTS ---
 import TermsConditions from './pages/legal/TermsConditions';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import RentalPolicy from './pages/legal/RentalPolicy';
 import StudentCode from './pages/legal/StudentCode';
 
-// --- NAVBAR COMPONENT ---
+// ── NAVBAR ──────────────────────────────────────────────────────────────────
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
+    setIsLoggedIn(!!localStorage.getItem('user'));
   }, [location]);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
     setIsLoggedIn(false);
-    alert("Logged out successfully");
     navigate('/login');
   };
 
+  const navLinks = [
+    { to: '/home', label: 'Home' },
+    { to: '/programs', label: 'Programs' },
+    { to: '/instructors', label: 'Instructors' },
+    { to: '/about', label: 'About' },
+    { to: '/faq', label: 'FAQ' },
+  ];
+
   return (
-    <nav style={styles.navbar}>
-      <style>{` .nav-link-item:hover { color: #ff3c78 !important; } `}</style>
-      <div style={styles.logo} onClick={() => navigate('/')}>Rhythm</div>
-      
-      <div style={styles.navLinks}>
-        <Link to="/home" className="nav-link-item" style={styles.navLink}>Home</Link>
-        <Link to="/about" className="nav-link-item" style={styles.navLink}>About Us</Link>
-        <Link to="/programs" className="nav-link-item" style={styles.navLink}>Programs</Link>
-        <Link to="/faq" className="nav-link-item" style={styles.navLink}>FAQ</Link>
+    <nav style={{
+      ...S.navbar,
+      background: scrolled ? 'rgba(10,10,10,0.97)' : 'rgba(10,10,10,0.75)',
+      backdropFilter: 'blur(12px)',
+      borderBottom: scrolled ? '1px solid #1e1e1e' : '1px solid transparent',
+      boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.4)' : 'none'
+    }}>
+      <style>{`
+        .nav-lnk { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; padding-bottom: 2px; }
+        .nav-lnk:hover, .nav-lnk.active { color: #fff; }
+        .nav-lnk.active { border-bottom: 2px solid #ff3c78; color: #fff; }
+        .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+        .logout-btn:hover { background: rgba(255,60,120,0.15) !important; }
+      `}</style>
+
+      <div style={S.logo} onClick={() => navigate('/')}>
+        <span style={{ color: '#ff3c78' }}>R</span>hythm
       </div>
 
-      <div style={styles.authGroup}>
+      <div style={S.navLinks}>
+        {navLinks.map(({ to, label }) => (
+          <Link key={to} to={to} className={`nav-lnk${location.pathname === to ? ' active' : ''}`}>
+            {label}
+          </Link>
+        ))}
+      </div>
+
+      <div style={S.authGroup}>
         {isLoggedIn ? (
-          <button onClick={handleLogout} className="action-btn" style={styles.loginBtn}>Logout</button>
+          <button onClick={handleLogout} className="logout-btn" style={S.logoutBtn}>Logout</button>
         ) : (
-          <Link to="/login" className="action-btn" style={styles.signupBtn}>Get Started</Link>
+          <>
+            <Link to="/login" style={S.loginBtn} className="nav-cta">Login</Link>
+            <Link to="/signup" style={S.signupBtn} className="nav-cta">Get Started</Link>
+          </>
         )}
       </div>
     </nav>
   );
 }
 
-// --- MAIN HERO DASHBOARD ---
+// ── HOMEPAGE ─────────────────────────────────────────────────────────────────
 function MainDashboard() {
   const navigate = useNavigate();
   const [enquiry, setEnquiry] = useState({ name: '', email: '', message: '' });
@@ -71,166 +101,197 @@ function MainDashboard() {
     setTimeout(() => setSuccess(false), 4000);
   };
 
+  const stats = [
+    { num: '15+', label: 'Dance Styles' },
+    { num: '25+', label: 'Expert Trainers' },
+    { num: '1,500+', label: 'Active Students' },
+    { num: '40+', label: 'Industry Awards' },
+  ];
+
+  const testimonials = [
+    { quote: '"The instructors don\'t just drill routines—they break down the musicality and feeling behind every move. My freestyle confidence has completely transformed."', name: '— Amara K.', track: 'Hip Hop Track' },
+    { quote: '"The community here is unmatched. Incredibly welcoming, flawless studio acoustics, and scheduling around my work is completely stress-free."', name: '— Jordan T.', track: 'Salsa & Contemporary' },
+  ];
+
+  const programs = [
+    { title: 'Urban Hip-Hop', tag: 'Street Styles', img: 'https://images.unsplash.com/photo-1504609773096-104ff2c73ba4?q=80&w=500', desc: 'Master high-energy grooves, isolation techniques, and modern commercial choreography.' },
+    { title: 'Salsa & Latin Fusion', tag: 'Latin', img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500', desc: 'Explosive footwork, intricate partner turn patterns, and rhythmic timing structures.' },
+    { title: 'Contemporary Flow', tag: 'Contemporary', img: 'https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=500', desc: 'Deep storytelling using fluid floor-work, weight distribution and creative expression.' },
+  ];
+
   return (
-    <div style={styles.homeContainer}>
+    <div style={{ width: '100%', background: '#0a0a0a', color: 'white', fontFamily: "'Poppins', sans-serif" }}>
       <style>{`
-        .action-btn:hover { transform: scale(1.04); cursor: pointer; transition: transform 0.2s ease; }
-        .footer-link { color: #888; text-decoration: none; transition: color 0.2s; font-size: 14px; cursor: pointer; display: inline-block; }
-        .footer-link:hover { color: #ff3c78; }
-        .form-input { width: 100%; background: #161616; border: 1px solid #333; padding: 12px; borderRadius: 8px; color: white; outline: none; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
-        .form-input:focus { border-color: #ff3c78; }
+        .prog-card:hover { transform: translateY(-8px); border-color: #ff3c78 !important; box-shadow: 0 20px 40px rgba(255,60,120,0.12); }
+        .prog-card { transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+        .testi-card { transition: border-color 0.3s ease; }
+        .testi-card:hover { border-color: #ff3c78 !important; }
+        .cta-primary:hover { background: #e0325e !important; transform: translateY(-2px); }
+        .cta-secondary:hover { background: rgba(255,255,255,0.08) !important; transform: translateY(-2px); }
+        .cta-primary, .cta-secondary { transition: all 0.25s ease; }
+        .form-inp { width: 100%; background: #161616; border: 1px solid #2a2a2a; padding: 13px 16px; border-radius: 10px; color: white; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; margin-bottom: 14px; box-sizing: border-box; }
+        .form-inp:focus { border-color: #ff3c78; }
+        .footer-lnk { color: #666; font-size: 13px; cursor: pointer; transition: color 0.2s; display: inline-block; }
+        .footer-lnk:hover { color: #ff3c78; }
       `}</style>
-      
-      {/* 1. HERO SECTION */}
-      <header style={styles.heroSection}>
-        <div style={styles.heroContent}>
-          <h1 style={styles.heroTitle}>Feel The <span style={{ color: '#ff3c78' }}>Rhythm</span> Of <br /> Dance</h1>
-          <p style={styles.heroSubtitle}>
-            Learn from professional instructors, explore multiple dance styles, and join the most energetic dance community. From absolute beginners to seasoned stage performers—your journey starts here.
+
+      {/* ── HERO ── */}
+      <header style={H.hero}>
+        <div style={H.heroOverlay} />
+        <div style={H.heroContent}>
+          <span style={H.heroBadge}>🎵 World-Class Dance Training</span>
+          <h1 style={H.heroTitle}>
+            Feel The <span style={{ color: '#ff3c78' }}>Rhythm</span><br />Of Dance
+          </h1>
+          <p style={H.heroSub}>
+            Learn from professional instructors, explore multiple dance styles, and join the most energetic dance community. From absolute beginners to seasoned stage performers.
           </p>
-          <div style={styles.btnGroup}>
-            <button onClick={() => navigate('/programs')} className="action-btn" style={styles.exploreBtn}>Explore Classes</button>
-            <button onClick={() => navigate('/signup')} className="action-btn" style={styles.secondaryBtn}>Join Academy</button>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => navigate('/programs')} className="cta-primary" style={H.ctaPrimary}>Explore Programs</button>
+            <button onClick={() => navigate('/signup')} className="cta-secondary" style={H.ctaSecondary}>Join Academy</button>
           </div>
         </div>
       </header>
 
-      {/* 2. ACADEMY STATS METRIC PANEL */}
-      <section style={styles.statsSection}>
-        <div style={styles.statsGrid}>
-          <div style={styles.statCard}><h3 style={styles.statNumber}>15+</h3><p style={styles.statLabel}>Dance Styles</p></div>
-          <div style={styles.statCard}><h3 style={styles.statNumber}>25+</h3><p style={styles.statLabel}>Expert Trainers</p></div>
-          <div style={styles.statCard}><h3 style={styles.statNumber}>1,500+</h3><p style={styles.statLabel}>Active Students</p></div>
-          <div style={styles.statCard}><h3 style={styles.statNumber}>40+</h3><p style={styles.statLabel}>Industry Awards</p></div>
+      {/* ── STATS ── */}
+      <section style={H.statsBar}>
+        {stats.map(s => (
+          <div key={s.label} style={H.statItem}>
+            <div style={H.statNum}>{s.num}</div>
+            <div style={H.statLabel}>{s.label}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* ── PROGRAMS ── */}
+      <section style={H.section}>
+        <p style={H.sectionTag}>WHAT WE OFFER</p>
+        <h2 style={H.sectionTitle}>Our Elite <span style={{ color: '#ff3c78' }}>Programs</span></h2>
+        <p style={H.sectionSub}>Select a discipline to discover curriculum and scheduling structure</p>
+        <div style={H.threeGrid}>
+          {programs.map(p => (
+            <div key={p.title} className="prog-card" style={H.progCard}>
+              <div style={{ ...H.progImg, backgroundImage: `url(${p.img})` }} />
+              <div style={{ padding: '22px' }}>
+                <span style={H.progTag}>{p.tag}</span>
+                <h3 style={H.progTitle}>{p.title}</h3>
+                <p style={H.progDesc}>{p.desc}</p>
+                <button onClick={() => navigate('/programs')} style={H.progBtn}>View Details →</button>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* 3. STUDENT TESTIMONIALS */}
-      <section style={styles.sectionPadding}>
-        <h2 style={styles.sectionTitle}>What Our <span style={{ color: '#ff3c78' }}>Dancers</span> Say</h2>
-        <div style={styles.testimonialGrid}>
-          <div style={styles.testimonialCard}>
-            <p style={styles.quote}>"The instructors don't just drill routines—they break down the musicality and feeling behind the style. My freestyle confidence has completely transformed."</p>
-            <div style={{ fontWeight: '600', color: '#ff3c78', marginBottom: '2px' }}>— Amara K.</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Hip Hop Track</div>
-          </div>
-          <div style={styles.testimonialCard}>
-            <p style={styles.quote}>"The community atmosphere here is unmatched. It's incredibly welcoming, the studio acoustics are flawless, and scheduling around my work is completely stress-free."</p>
-            <div style={{ fontWeight: '600', color: '#ff3c78', marginBottom: '2px' }}>— Jordan T.</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Salsa & Contemporary</div>
-          </div>
+      {/* ── WHY US ── */}
+      <section style={{ ...H.section, background: '#0d0d0d', borderTop: '1px solid #161616', borderBottom: '1px solid #161616' }}>
+        <p style={H.sectionTag}>WHY RHYTHM</p>
+        <h2 style={H.sectionTitle}>The Rhythm <span style={{ color: '#ff3c78' }}>Experience</span></h2>
+        <div style={H.whyGrid}>
+          {[
+            { icon: '🏆', title: 'World-Class Instructors', desc: 'Certified professionals with international stage and competition experience.' },
+            { icon: '🎯', title: 'Structured Curriculum', desc: 'Progressive skill-building tracks from beginner foundations to performance-ready mastery.' },
+            { icon: '🏟️', title: 'Premium Studio Spaces', desc: 'State-of-the-art sprung flooring, mirrored walls, and professional sound systems.' },
+            { icon: '🤝', title: 'Inclusive Community', desc: 'A welcoming environment for all ages, backgrounds, and experience levels.' },
+          ].map(item => (
+            <div key={item.title} style={H.whyCard}>
+              <div style={H.whyIcon}>{item.icon}</div>
+              <h4 style={H.whyTitle}>{item.title}</h4>
+              <p style={H.whyDesc}>{item.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* 4. CONTACT INFRASTRUCTURE & ENQUIRY FORM */}
-      <section style={{ ...styles.sectionPadding, background: '#0b0b0b', borderTop: '1px solid #141414' }}>
-        <div style={styles.contactRowGrid}>
+      {/* ── TESTIMONIALS ── */}
+      <section style={H.section}>
+        <p style={H.sectionTag}>STUDENT STORIES</p>
+        <h2 style={H.sectionTitle}>What Our <span style={{ color: '#ff3c78' }}>Dancers</span> Say</h2>
+        <div style={H.twoGrid}>
+          {testimonials.map(t => (
+            <div key={t.name} className="testi-card" style={H.testiCard}>
+              <p style={H.testiQuote}>{t.quote}</p>
+              <div style={{ fontWeight: '600', color: '#ff3c78', fontSize: '14px' }}>{t.name}</div>
+              <div style={{ fontSize: '12px', color: '#555', marginTop: '3px' }}>{t.track}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CONTACT ── */}
+      <section style={{ ...H.section, background: '#0d0d0d', borderTop: '1px solid #161616' }}>
+        <div style={H.contactGrid}>
           <div>
-            <h2 style={{ ...styles.sectionTitle, textAlign: 'left', marginBottom: '15px' }}>Have Questions?<br />Drop Us a <span style={{ color: '#ff3c78' }}>Message</span></h2>
-            <p style={{ color: '#888', fontSize: '14px', lineHeight: '1.6', maxWidth: '440px', marginBottom: '30px' }}>
-              Want to check slot structures, ask about private family sessions, evaluate studio spaces, or secure corporate discounts? Fill out the inquiry sheet, and our management desk will jump on it.
+            <p style={H.sectionTag}>GET IN TOUCH</p>
+            <h2 style={{ ...H.sectionTitle, textAlign: 'left', marginBottom: '16px' }}>
+              Have Questions?<br />Drop Us a <span style={{ color: '#ff3c78' }}>Message</span>
+            </h2>
+            <p style={{ color: '#666', fontSize: '14px', lineHeight: '1.7', marginBottom: '32px', maxWidth: '420px' }}>
+              Want to check slot availability, ask about private sessions, or corporate pricing? Our team will respond within 24 hours.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', fontSize: '15px' }}>
-              <div>✉️ <span style={{ marginLeft: '8px', color: '#eee' }}>support@rhythmdance.com</span></div>
-              <div>📞 <span style={{ marginLeft: '8px', color: '#eee' }}>+1 (555) 019-2834</span></div>
-              <div>📍 <span style={{ marginLeft: '8px', color: '#555' }}>123 Creative Studio Lane, New York, NY</span></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[['✉️', 'support@rhythmdance.com'], ['📞', '+1 (555) 019-2834'], ['📍', '123 Creative Studio Lane, New York, NY']].map(([icon, text]) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#aaa', fontSize: '14px' }}>
+                  <span style={{ fontSize: '18px' }}>{icon}</span>{text}
+                </div>
+              ))}
             </div>
           </div>
 
-          <div style={styles.enquiryCard}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '600' }}>Enquiry Form</h3>
-            {success && <div style={styles.successAlert}>Message routed! We will respond within 24 business hours.</div>}
+          <div style={H.contactCard}>
+            <h3 style={{ margin: '0 0 22px 0', fontSize: '18px', fontWeight: '600' }}>Send an Enquiry</h3>
+            {success && <div style={H.successBox}>✅ Message sent! We'll respond within 24 hours.</div>}
             <form onSubmit={handleEnquirySubmit}>
-              <input 
-                type="text" 
-                placeholder="Your Full Name" 
-                className="form-input" 
-                value={enquiry.name}
-                onChange={(e) => setEnquiry({...enquiry, name: e.target.value})}
-                required 
-              />
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                className="form-input" 
-                value={enquiry.email}
-                onChange={(e) => setEnquiry({...enquiry, email: e.target.value})}
-                required 
-              />
-              <textarea 
-                placeholder="What details are you looking for?" 
-                className="form-input" 
-                rows="4"
-                value={enquiry.message}
-                onChange={(e) => setEnquiry({...enquiry, message: e.target.value})}
-                style={{ resize: 'none' }}
-                required 
-              ></textarea>
-              <button type="submit" style={styles.submitEnquiryBtn}>Send Enquiry</button>
+              <input type="text" placeholder="Your Full Name" className="form-inp" value={enquiry.name} onChange={e => setEnquiry({ ...enquiry, name: e.target.value })} required />
+              <input type="email" placeholder="Email Address" className="form-inp" value={enquiry.email} onChange={e => setEnquiry({ ...enquiry, email: e.target.value })} required />
+              <textarea placeholder="What are you looking for?" className="form-inp" rows="4" value={enquiry.message} onChange={e => setEnquiry({ ...enquiry, message: e.target.value })} style={{ resize: 'none', marginBottom: '18px' }} required />
+              <button type="submit" style={H.ctaPrimary} className="cta-primary">Send Message</button>
             </form>
           </div>
         </div>
       </section>
 
-      {/* 5. CORPORATE NETWORK FOOTER */}
-      <footer style={styles.footerContainer}>
-        <div style={styles.footerGrid}>
-          <div style={styles.footerColumn}>
-            <h3 style={{ color: '#ff3c78', fontSize: '22px', margin: '0 0 15px 0', fontWeight: '700', letterSpacing: '0.5px' }}>Rhythm</h3>
-            <p style={{ color: '#666', fontSize: '13px', lineHeight: '1.6', margin: 0 }}>
-              Empowering artists across global standards with elite technical training, state-of-the-art wooden flooring layouts, and high-production performance showcases.
+      {/* ── FOOTER ── */}
+      <footer style={H.footer}>
+        <div style={H.footerGrid}>
+          <div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#ff3c78', marginBottom: '14px', letterSpacing: '1px' }}>Rhythm</div>
+            <p style={{ color: '#444', fontSize: '13px', lineHeight: '1.7', maxWidth: '260px' }}>
+              Empowering artists with elite technical training and high-production performance showcases.
             </p>
           </div>
-
-          <div style={styles.footerColumn}>
-            <h4 style={styles.footerHeading}>Navigation</h4>
-            <div style={styles.footerLinkList}>
-              <span onClick={() => navigate('/home')} className="footer-link">Home Portal</span>
-              <span onClick={() => navigate('/about')} className="footer-link">About Us</span>
-              <span onClick={() => navigate('/programs')} className="footer-link">Dance Programs</span>
-              <span onClick={() => navigate('/faq')} className="footer-link">FAQ Desk</span>
+          {[
+            { heading: 'Navigation', links: [['Home', '/home'], ['Programs', '/programs'], ['Instructors', '/instructors'], ['FAQ', '/faq']] },
+            { heading: 'Admissions', links: [['Registration', '/registration'], ['Login', '/login'], ['Create Account', '/signup'], ['About Us', '/about']] },
+            { heading: 'Legal', links: [['Terms & Conditions', '/terms-conditions'], ['Privacy Policy', '/privacy-policy'], ['Rental Policy', '/rental-policy'], ['Student Code', '/student-code']] },
+          ].map(col => (
+            <div key={col.heading}>
+              <h4 style={H.footerHeading}>{col.heading}</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {col.links.map(([label, path]) => (
+                  <Link key={label} to={path} className="footer-lnk">{label}</Link>
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div style={styles.footerColumn}>
-            <h4 style={styles.footerHeading}>Admissions</h4>
-            <div style={styles.footerLinkList}>
-              <span onClick={() => navigate('/registration')} className="footer-link">Application Form</span>
-              <span onClick={() => navigate('/instructors')} className="footer-link">Our Instructors</span>
-              <span onClick={() => navigate('/login')} className="footer-link">Student Login</span>
-              <span onClick={() => navigate('/signup')} className="footer-link">Create Account</span>
-            </div>
-          </div>
-
-          {/* CHANNELS REDIRECTING TO UNIQUE LINKS */}
-          <div style={styles.footerColumn}>
-            <h4 style={styles.footerHeading}>Legal Compliance</h4>
-            <div style={styles.footerLinkList}>
-              <span onClick={() => navigate('/terms-conditions')} className="footer-link">Terms & Conditions</span>
-              <span onClick={() => navigate('/privacy-policy')} className="footer-link">Privacy Policy</span>
-              <span onClick={() => navigate('/rental-policy')} className="footer-link">Studio Rental Policy</span>
-              <span onClick={() => navigate('/student-code')} className="footer-link">Student Code</span>
-            </div>
-          </div>
+          ))}
         </div>
-
-        <div style={styles.footerBottom}>
-          <p style={{ margin: 0 }}>© 2026 Rhythm Performing Arts Academy. All rights reserved.</p>
+        <div style={H.footerBottom}>
+          <span>© 2026 Rhythm Performing Arts Academy. All rights reserved.</span>
         </div>
       </footer>
     </div>
   );
 }
 
-// --- CORE ROUTER ROOT ---
+// ── APP ROUTER ────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <Router>
-      <Navbar /> 
-      <div style={{ paddingTop: '80px', minHeight: 'calc(100vh - 80px)', background: '#0a0a0a' }}>
+      <Navbar />
+      <div style={{ paddingTop: '70px' }}>
         <Routes>
           <Route path="/" element={<MainDashboard />} />
-          <Route path="/home" element={<MainDashboard />} /> 
+          <Route path="/home" element={<MainDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -240,8 +301,6 @@ export default function App() {
           <Route path="/registration" element={<Registration />} />
           <Route path="/instructors" element={<Instructors />} />
           <Route path="/admin" element={<AdminDashboard />} />
-
-          {/* INDIVIDUALIZED LEGAL ROUTES MAP */}
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/rental-policy" element={<RentalPolicy />} />
@@ -252,41 +311,61 @@ export default function App() {
   );
 }
 
-// --- STYLESHEET CONFIGURATIONS ---
-const styles = {
-  homeContainer: { width: '100%', minHeight: 'calc(100vh - 80px)', background: '#0a0a0a', color: 'white', fontFamily: "'Poppins', sans-serif" },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 5%', background: '#0a0a0a', position: 'fixed', top: 0, left: 0, width: '100%', height: '80px', zIndex: 1000, borderBottom: '1px solid #1a1a1a', boxSizing: 'border-box' },
-  logo: { fontSize: '26px', fontWeight: '700', color: '#ff3c78', letterSpacing: '1px', cursor: 'pointer' },
-  navLinks: { display: 'flex', gap: '30px', alignItems: 'center' },
-  navLink: { color: 'white', textDecoration: 'none', fontSize: '15px', fontWeight: '500', transition: 'color 0.2s' },
-  authGroup: { display: 'flex', gap: '12px', alignItems: 'center' },
-  loginBtn: { background: 'transparent', color: 'white', border: '2px solid #ff3c78', padding: '8px 25px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer' },
-  signupBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '10px 25px', borderRadius: '20px', fontSize: '14px', textDecoration: 'none', fontWeight: '600' },
-  heroSection: { height: 'calc(85vh - 80px)', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundImage: "linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1974')", backgroundSize: 'cover', backgroundPosition: 'center' },
-  heroContent: { textAlign: 'center', maxWidth: '850px', padding: '0 20px' },
-  heroTitle: { fontSize: '56px', fontWeight: '700', marginBottom: '20px', lineHeight: '1.2' },
-  heroSubtitle: { fontSize: '15px', color: '#aaa', marginBottom: '35px', lineHeight: '1.7', maxWidth: '680px', margin: '0 auto 35px' },
-  btnGroup: { display: 'flex', justifyContent: 'center', gap: '15px' },
-  exploreBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '14px 35px', borderRadius: '30px', fontSize: '15px', fontWeight: '600' },
-  secondaryBtn: { background: 'transparent', color: 'white', border: '2px solid white', padding: '12px 35px', borderRadius: '30px', fontSize: '15px', fontWeight: '600' },
-  statsSection: { background: '#111', padding: '50px 5%', borderTop: '1px solid #1c1c1c', borderBottom: '1px solid #1c1c1c' },
-  statsGrid: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '30px', maxWidth: '1200px', margin: '0 auto' },
-  statCard: { textAlign: 'center', minWidth: '160px' },
-  statNumber: { fontSize: '36px', color: '#ff3c78', margin: '0 0 5px 0', fontWeight: '700' },
-  statLabel: { color: '#777', margin: 0, fontSize: '14px', fontWeight: '500' },
-  sectionPadding: { padding: '90px 10% 100px' },
-  sectionTitle: { fontSize: '32px', fontWeight: '700', textAlign: 'center', marginBottom: '50px', letterSpacing: '0.5px' },
-  testimonialGrid: { display: 'flex', gap: '30px', justifyContent: 'center', flexWrap: 'wrap' },
-  testimonialCard: { background: '#141414', border: '1px solid #222', padding: '35px', borderRadius: '16px', maxWidth: '480px', flex: '1', minWidth: '290px' },
-  quote: { fontStyle: 'italic', color: '#bbb', fontSize: '14.5px', lineHeight: '1.65', marginBottom: '25px', marginTop: 0 },
-  contactRowGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '60px', maxWidth: '1200px', margin: '0 auto', alignItems: 'center' },
-  enquiryCard: { background: '#141414', border: '1px solid #222', padding: '35px', borderRadius: '16px', boxSizing: 'border-box' },
-  successAlert: { background: 'rgba(46, 204, 113, 0.12)', color: '#2ecc71', border: '1px solid rgba(46, 204, 113, 0.3)', padding: '12px', borderRadius: '6px', fontSize: '13px', marginBottom: '20px', textAlign: 'center' },
-  submitEnquiryBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '13px 25px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', width: '100%', cursor: 'pointer', transition: 'background 0.2s' },
-  footerContainer: { background: '#050505', borderTop: '1px solid #141414', padding: '70px 10% 25px' },
-  footerGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', maxWidth: '1200px', margin: '0 auto' },
-  footerColumn: { display: 'flex', flexDirection: 'column' },
-  footerHeading: { fontSize: '14px', fontWeight: '600', marginBottom: '22px', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#999' },
-  footerLinkList: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  footerBottom: { maxWidth: '1200px', margin: '50px auto 0', paddingTop: '25px', borderTop: '1px solid #111', textAlign: 'center', fontSize: '12px', color: '#444' }
+// ── STYLES ────────────────────────────────────────────────────────────────────
+const S = {
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 6%', position: 'fixed', top: 0, left: 0, width: '100%', height: '70px', zIndex: 1000, boxSizing: 'border-box', transition: 'all 0.3s ease' },
+  logo: { fontSize: '24px', fontWeight: '700', letterSpacing: '1px', cursor: 'pointer', color: 'white' },
+  navLinks: { display: 'flex', gap: '32px', alignItems: 'center' },
+  authGroup: { display: 'flex', gap: '10px', alignItems: 'center' },
+  loginBtn: { color: '#ccc', fontSize: '14px', fontWeight: '500', padding: '8px 18px', borderRadius: '8px', border: '1px solid #2a2a2a', transition: 'all 0.2s' },
+  signupBtn: { background: '#ff3c78', color: 'white', fontSize: '14px', fontWeight: '600', padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer' },
+  logoutBtn: { background: 'transparent', color: '#ccc', fontSize: '14px', padding: '8px 18px', borderRadius: '8px', border: '1px solid #2a2a2a', cursor: 'pointer', transition: 'all 0.2s' },
+};
+
+const H = {
+  hero: { position: 'relative', minHeight: '92vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: "url('https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1974')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' },
+  heroOverlay: { position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.6) 60%, rgba(10,10,10,1) 100%)' },
+  heroContent: { position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '780px', padding: '0 24px' },
+  heroBadge: { display: 'inline-block', background: 'rgba(255,60,120,0.15)', border: '1px solid rgba(255,60,120,0.3)', color: '#ff3c78', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', letterSpacing: '0.5px', marginBottom: '24px' },
+  heroTitle: { fontSize: 'clamp(42px, 7vw, 72px)', fontWeight: '800', lineHeight: '1.1', marginBottom: '22px', letterSpacing: '-1px' },
+  heroSub: { fontSize: '16px', color: '#aaa', lineHeight: '1.75', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' },
+  ctaPrimary: { background: '#ff3c78', color: 'white', border: 'none', padding: '14px 36px', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
+  ctaSecondary: { background: 'rgba(255,255,255,0.06)', color: 'white', border: '1px solid rgba(255,255,255,0.15)', padding: '13px 36px', borderRadius: '10px', fontSize: '15px', fontWeight: '500', cursor: 'pointer' },
+
+  statsBar: { display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px', padding: '50px 8%', background: '#0d0d0d', borderBottom: '1px solid #161616' },
+  statItem: { textAlign: 'center' },
+  statNum: { fontSize: '38px', fontWeight: '800', color: '#ff3c78', letterSpacing: '-1px' },
+  statLabel: { fontSize: '13px', color: '#666', marginTop: '4px', fontWeight: '500' },
+
+  section: { padding: '90px 8%', background: '#0a0a0a' },
+  sectionTag: { textAlign: 'center', fontSize: '11px', fontWeight: '700', letterSpacing: '2px', color: '#ff3c78', marginBottom: '10px', textTransform: 'uppercase' },
+  sectionTitle: { fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: '700', textAlign: 'center', marginBottom: '10px' },
+  sectionSub: { textAlign: 'center', color: '#666', fontSize: '14px', marginBottom: '50px' },
+
+  threeGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '1100px', margin: '0 auto' },
+  progCard: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '16px', overflow: 'hidden' },
+  progImg: { height: '200px', backgroundSize: 'cover', backgroundPosition: 'center' },
+  progTag: { display: 'inline-block', background: 'rgba(255,60,120,0.12)', color: '#ff3c78', fontSize: '10px', fontWeight: '700', letterSpacing: '1px', padding: '4px 10px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '10px' },
+  progTitle: { fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#fff' },
+  progDesc: { fontSize: '13px', color: '#777', lineHeight: '1.6', marginBottom: '18px' },
+  progBtn: { background: 'none', border: 'none', color: '#ff3c78', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 },
+
+  whyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1100px', margin: '50px auto 0' },
+  whyCard: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '14px', padding: '28px 24px' },
+  whyIcon: { fontSize: '28px', marginBottom: '14px' },
+  whyTitle: { fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#fff' },
+  whyDesc: { fontSize: '13px', color: '#666', lineHeight: '1.6' },
+
+  twoGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '900px', margin: '50px auto 0' },
+  testiCard: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '16px', padding: '32px' },
+  testiQuote: { fontSize: '14px', color: '#bbb', lineHeight: '1.75', marginBottom: '20px', fontStyle: 'italic' },
+
+  contactGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px', maxWidth: '1100px', margin: '0 auto', alignItems: 'start' },
+  contactCard: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '16px', padding: '36px' },
+  successBox: { background: 'rgba(46,204,113,0.1)', color: '#2ecc71', border: '1px solid rgba(46,204,113,0.3)', padding: '12px', borderRadius: '8px', fontSize: '13px', marginBottom: '20px', textAlign: 'center' },
+
+  footer: { background: '#060606', borderTop: '1px solid #111', padding: '70px 8% 28px' },
+  footerGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '40px', maxWidth: '1100px', margin: '0 auto' },
+  footerHeading: { fontSize: '11px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#444', marginBottom: '20px' },
+  footerBottom: { maxWidth: '1100px', margin: '50px auto 0', paddingTop: '22px', borderTop: '1px solid #111', textAlign: 'center', fontSize: '12px', color: '#333' },
 };

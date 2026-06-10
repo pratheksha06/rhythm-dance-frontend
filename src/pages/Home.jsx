@@ -26,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await axios.get('https://rhythm-dance-backend.onrender.com/api/classes');
+        const response = await axios.get('http://localhost:5000/api/classes');
         setClasses(response.data);
       } catch (error) {
         console.error("Error fetching studio schedule layouts:", error);
@@ -61,7 +61,7 @@ export default function Home() {
     }
 
     try {
-      const response = await axios.post('https://rhythm-dance-backend.onrender.com/api/classes/enroll',{
+      const response = await axios.post('http://localhost:5000/api/classes/enroll',{
         userId: currentUser._id,
         classId: classId
       });

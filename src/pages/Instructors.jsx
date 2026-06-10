@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const instructorData = [
+const staticInstructors = [
   {
     id: 1,
     name: "Marcus 'Matrix' Vance",
@@ -44,8 +45,27 @@ const instructorData = [
 ];
 
 export default function Instructors() {
+  const [instructorData, setInstructorData] = useState(staticInstructors);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    axios.get('http://localhost:5000/api/users?role=instructor')
+      .then(res => {
+        const dbInstructors = res.data
+          .filter(u => u.role === 'instructor')
+          .map(u => ({
+            id: u._id,
+            name: u.name,
+            style: u.danceStyle || u.experienceLevel || 'Instructor',
+            phone: u.phone || 'Contact via studio',
+            email: u.email,
+            achievements: u.bio || 'Professional dance instructor.',
+            bio: u.bio || '',
+            image: u.imageUrl || 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600'
+          }));
+        setInstructorData([...staticInstructors, ...dbInstructors]);
+      })
+      .catch(err => console.error('Failed to load instructors:', err));
   }, []);
 
   return (

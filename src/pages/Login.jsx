@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [role, setRole] = useState('user'); // Defaulting role state selection
+  const [role, setRole] = useState('user');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -13,28 +15,31 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
-
     try {
-      // Mock API Authentication Flow
-      // Replace this fetch URL with your real backend endpoint if you have one active
-      // const response = await fetch('http://localhost:5000/api/auth/login', { ... });
-      
-      console.log(`Logging in as ${role}:`, formData);
-      
-      // Save simulation user token data
-      localStorage.setItem("user", JSON.stringify({ email: formData.email, role: role }));
-      
-      alert(`Logged in successfully as ${role === 'admin' ? 'Admin' : 'User'}`);
-      
-      // DYNAMIC REDIRECTION LOGIC
-      if (role === 'admin') {
-        navigate('/admin'); // Redirects admins cleanly to dashboard view
-      } else {
-        navigate('/home');  // Redirects general clients back to homepage dashboard view
+      const res = await axios.post('http://localhost:5000/api/users/login', {
+        email: formData.email,
+        password: formData.password
+      });
+      const user = res.data;
+
+      if (role === 'admin' && user.role !== 'admin') {
+        setError('Access denied. This account does not have admin privileges.');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      alert("Login failed. Please verify credentials.");
+
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('role', user.role);
+
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
@@ -71,6 +76,8 @@ export default function Login() {
 
         <h2 style={loginStyles.title}>{role === 'admin' ? 'Admin Dashboard Entry' : 'Welcome Back'}</h2>
         <p style={loginStyles.subtitle}>Enter your account management credentials below</p>
+
+        {error && <div style={loginStyles.errorAlert}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={loginStyles.form}>
           <div style={loginStyles.inputGroup}>
@@ -130,5 +137,6 @@ const loginStyles = {
   forgotLink: { color: '#ff3c78', fontSize: '13px', textDecoration: 'none', fontWeight: '500' },
   input: { background: '#1a1a1a', border: '1px solid #222', padding: '12px 16px', borderRadius: '8px', color: 'white', fontSize: '14px', outline: 'none' },
   submitBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' },
+  errorAlert: { backgroundColor: 'rgba(231,76,60,0.1)', color: '#e74c3c', padding: '12px', borderRadius: '8px', marginBottom: '10px', fontSize: '13px', border: '1px solid #e74c3c', textAlign: 'center' },
   footerText: { color: '#666', fontSize: '14px', textAlign: 'center', marginTop: '24px' }
 };
