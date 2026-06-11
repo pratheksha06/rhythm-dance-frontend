@@ -38,8 +38,13 @@ export default function Registration() {
     }
     setLoading(true);
     setError('');
+
+    // 1. Resolve live vs local API routing path dynamically
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
     try {
-      await axios.post('http://localhost:5000/api/enrollments', {
+      // 2. Updated to target production backend deployment structure securely
+      await axios.post(`${API_BASE_URL}/api/enrollments`, {
         student: user._id || user.id,
         class: selectedClass?._id || selectedClass?.id,
         ...formData,
@@ -47,7 +52,7 @@ export default function Registration() {
       });
     } catch (err) {
       console.error('Enrollment error:', err.response?.data || err.message);
-    } finally {
+    } fileName: {
       setLoading(false);
       setSuccessMessage('done');
       setTimeout(() => navigate('/home'), 4000);

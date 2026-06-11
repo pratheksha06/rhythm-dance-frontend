@@ -47,9 +47,13 @@ const staticInstructors = [
 export default function Instructors() {
   const [instructorData, setInstructorData] = useState(staticInstructors);
 
+  // Resolve dynamic target API endpoint paths safely
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    axios.get('http://localhost:5000/api/users?role=instructor')
+    // Updated to handle backend endpoints dynamically
+    axios.get(`${API_BASE_URL}/api/users?role=instructor`)
       .then(res => {
         const dbInstructors = res.data
           .filter(u => u.role === 'instructor')
@@ -66,7 +70,7 @@ export default function Instructors() {
         setInstructorData([...staticInstructors, ...dbInstructors]);
       })
       .catch(err => console.error('Failed to load instructors:', err));
-  }, []);
+  }, [API_BASE_URL]);
 
   return (
     <div style={styles.container}>
@@ -97,7 +101,7 @@ export default function Instructors() {
         }
       `}</style>
 
-      {/* Header section matching image_a5a11f.png style */}
+      {/* Header section matching style layouts */}
       <header style={styles.header}>
         <h1 style={styles.mainTitle}>Meet Our <span style={{ color: '#ff3c78' }}>Elite Instructors</span></h1>
         <p style={styles.subtitle}>Learn from certified, world-class movement professionals dedicated to your growth</p>

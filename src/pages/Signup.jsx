@@ -30,7 +30,11 @@ const Signup = () => {
     try {
       setLoading(true);
       
-      const response = await axios.post('http://localhost:5000/api/users/register', {
+      // 1. Resolve dynamic target API endpoint
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
+      // 2. Transmit using the production server URL string
+      const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,

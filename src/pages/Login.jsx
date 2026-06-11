@@ -17,8 +17,13 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // 1. Resolve API destination dynamically based on environment
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', {
+      // 2. Transmit request using template strings to support production server
+      const res = await axios.post(`${API_BASE_URL}/api/users/login`, {
         email: formData.email,
         password: formData.password
       });

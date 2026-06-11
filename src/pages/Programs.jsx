@@ -8,8 +8,10 @@ export default function Programs() {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
   useEffect(() => {
-    axios.get('http://localhost:5000/api/classes')
+    axios.get(`${API_BASE_URL}/api/classes`)
       .then(res => {
         setPrograms(res.data);
         setLoading(false);
@@ -18,7 +20,7 @@ export default function Programs() {
         console.error(err);
         setLoading(false);
       });
-  }, []);
+  }, [API_BASE_URL]);
 
   if (loading) return <div style={styles.center}>Loading elite dance styles...</div>;
 
@@ -29,19 +31,16 @@ export default function Programs() {
 
       <div style={styles.grid}>
         {programs.map((program) => {
-          // 1. SAFELY READ THE ADMIN LINK IN JAVASCRIPT BEFORE THE RETURN BLOCK
           const cardImage = program.programImageUrl || 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500';
           
           return (
             <div key={program._id || program.id} style={styles.card}>
-              {/* 2. PLACED BEAUTIFULLY INSIDE YOUR VISUAL LAYOUT ROUTE */}
               <div style={{ ...styles.cardImage, backgroundImage: `url(${cardImage})` }} />
               
               <div style={styles.cardContent}>
                 <span style={styles.cardTag}>{program.danceStyle || 'Dance Discipline'}</span>
                 <h3 style={styles.cardTitle}>{program.className || 'Untitled Style'}</h3>
                 
-                {/* Truncated description field to prevent content boxes from skewing sizes */}
                 <p style={styles.cardDescription}>
                   {program.description || 'No overview configured for this style yet.'}
                 </p>
@@ -55,7 +54,6 @@ export default function Programs() {
         })}
       </div>
 
-      {/* Pop-up Details Modal Window */}
       {selectedProgram && (
         <div style={styles.modalOverlay} onClick={() => setSelectedProgram(null)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -89,7 +87,6 @@ const styles = {
   subtitle: { textAlign: 'center', color: '#aaa', fontSize: '15px', marginBottom: '50px' },
   center: { minHeight: '100vh', backgroundColor: '#0a0a0a', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px', maxWidth: '1200px', margin: '0 auto' },
-  
   card: { backgroundColor: '#141414', borderRadius: '15px', border: '1px solid #222', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '420px' },
   cardImage: { height: '180px', minHeight: '180px', backgroundSize: 'cover', backgroundPosition: 'center', width: '100%' },
   cardContent: { padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 },
@@ -97,7 +94,6 @@ const styles = {
   cardTitle: { fontSize: '22px', fontWeight: '600', margin: '0 0 8px 0', color: '#fff' },
   cardDescription: { color: '#aaa', fontSize: '13px', lineHeight: '1.5', margin: '0 0 15px 0', display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', height: '58px' },
   learnMoreBtn: { background: 'none', border: 'none', color: '#fff', fontSize: '14px', fontWeight: '500', cursor: 'pointer', padding: 0, marginTop: 'auto', textAlign: 'left', width: 'fit-content' },
-  
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
   modalContent: { backgroundColor: '#141414', border: '1px solid #282828', width: '100%', maxWidth: '500px', borderRadius: '20px', overflow: 'hidden' },
   modalImage: { height: '200px', backgroundSize: 'cover', backgroundPosition: 'center' },

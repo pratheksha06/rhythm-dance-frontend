@@ -27,8 +27,10 @@ export default function AdminDashboard() {
   const [instMessage, setInstMessage] = useState('');
   const [instError, setInstError] = useState('');
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://rhythm-dance-backend-2.onrender.com';
+
   const fetchInstructors = async () => {
-    const res = await axios.get('http://localhost:5000/api/users');
+    const res = await axios.get(`${API_BASE_URL}/api/users`);
     const instructors = res.data.filter(u => u.role === 'instructor');
     setInstructorsList(instructors);
     return instructors;
@@ -37,9 +39,9 @@ export default function AdminDashboard() {
   const refreshDashboardData = async () => {
     try {
       const [usersRes, classesRes, enrollRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/users'),
-        axios.get('http://localhost:5000/api/classes'),
-        axios.get('http://localhost:5000/api/enrollments')
+        axios.get(`${API_BASE_URL}/api/users`),
+        axios.get(`${API_BASE_URL}/api/classes`),
+        axios.get(`${API_BASE_URL}/api/enrollments`)
       ]);
       setMetrics({ totalUsers: usersRes.data.length, totalClasses: classesRes.data.length, totalEnrollments: enrollRes.data.length });
       setInstructorsList(usersRes.data.filter(u => u.role === 'instructor'));
@@ -51,7 +53,7 @@ export default function AdminDashboard() {
 
   const handleStatusChange = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/enrollments/${id}/status`, { status });
+      await axios.put(`${API_BASE_URL}/api/enrollments/${id}/status`, { status });
       setEnrollments(prev => prev.map(e => e._id === id ? { ...e, status } : e));
     } catch (err) {
       console.error('Status update failed:', err);
@@ -61,7 +63,7 @@ export default function AdminDashboard() {
   const handleDeleteEnrollment = async (id) => {
     if (!window.confirm('Delete this enrollment?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/enrollments/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/enrollments/${id}`);
       setEnrollments(prev => prev.filter(e => e._id !== id));
       setMetrics(prev => ({ ...prev, totalEnrollments: prev.totalEnrollments - 1 }));
     } catch (err) {
@@ -69,7 +71,7 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => { refreshDashboardData(); }, []);
+  useEffect(() => { refreshDashboardData(); }, [API_BASE_URL]);
 
   const handleClassInput = (e) =>
     setClassForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -86,7 +88,7 @@ export default function AdminDashboard() {
         capacity: Number(classForm.capacity),
         fee: Number(classForm.fee)
       };
-      await axios.post('http://localhost:5000/api/classes', payload);
+      await axios.post(`${API_BASE_URL}/api/classes`, payload);
       setMessage('🎉 Program successfully launched!');
       setClassForm(EMPTY_CLASS_FORM);
       refreshDashboardData();
@@ -101,7 +103,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     setInstMessage(''); setInstError(''); setInstLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/users/register', {
+      const res = await axios.post(`${API_BASE_URL}/api/users/register`, {
         ...instructorForm,
         role: 'instructor'
       });
@@ -109,7 +111,6 @@ export default function AdminDashboard() {
       setInstMessage(`✅ Instructor "${newInstructor.name}" registered successfully.`);
       setInstructorForm(EMPTY_INSTRUCTOR_FORM);
 
-      // Re-fetch instructors and auto-select the new one
       const updated = await fetchInstructors();
       const match = updated.find(u => u.email === newInstructor.email || u._id === newInstructor._id);
       if (match) setClassForm(prev => ({ ...prev, instructor: match._id || match.id }));
@@ -196,7 +197,6 @@ export default function AdminDashboard() {
       )}
 
       <div style={{ ...styles.dashboardGrid, display: enrollTab ? 'none' : 'flex' }}>
-        {/* ── CLASS FORM ── */}
         <div style={styles.formPanel}>
           <h3 style={styles.panelTitle}>Publish a New Dance Program</h3>
 
@@ -267,7 +267,6 @@ export default function AdminDashboard() {
           </form>
         </div>
 
-        {/* ── INSTRUCTOR CREATION PANEL ── */}
         {showInstructorForm && (
           <div style={{ ...styles.formPanel, borderColor: '#ff3c78' }}>
             <h3 style={styles.panelTitle}>Register New <span style={{ color: '#ff3c78' }}>Instructor</span></h3>
@@ -326,7 +325,6 @@ export default function AdminDashboard() {
   );
 }
 
-// Minimal wrapper to reduce JSX repetition
 function Field({ label, children }) {
   return (
     <div style={styles.inputGroup}>

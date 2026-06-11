@@ -12,6 +12,9 @@ export default function Home() {
   // Contact Form State
   const [contactData, setContactData] = useState({ name: '', email: '', message: '' });
 
+  // Resolve dynamic target API endpoint paths safely
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   // Sync login status from localStorage
   useEffect(() => {
     const storedUserData = localStorage.getItem("user");
@@ -26,7 +29,8 @@ export default function Home() {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/classes');
+        // 1. Updated to target the Render production variable mapping seamlessly
+        const response = await axios.get(`${API_BASE_URL}/api/classes`);
         setClasses(response.data);
       } catch (error) {
         console.error("Error fetching studio schedule layouts:", error);
@@ -35,7 +39,7 @@ export default function Home() {
       }
     };
     fetchClasses();
-  }, []);
+  }, [API_BASE_URL]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -61,7 +65,8 @@ export default function Home() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/classes/enroll',{
+      // 2. Updated target destination to allow dynamic routing processing
+      const response = await axios.post(`${API_BASE_URL}/api/classes/enroll`, {
         userId: currentUser._id,
         classId: classId
       });
