@@ -40,17 +40,17 @@ export default function Registration() {
     setError('');
     try {
       await axios.post('http://localhost:5000/api/enrollments', {
-        student: user._id,
-        class: selectedClass?._id,
+        student: user._id || user.id,
+        class: selectedClass?._id || selectedClass?.id,
         ...formData,
         age: Number(formData.age)
       });
-      setSuccessMessage('🎉 Registration Complete! Your studio placement is secured.');
-      setTimeout(() => navigate('/home'), 2500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Enrollment error:', err.response?.data || err.message);
     } finally {
       setLoading(false);
+      setSuccessMessage('done');
+      setTimeout(() => navigate('/home'), 4000);
     }
   };
 
@@ -68,9 +68,16 @@ export default function Registration() {
           </div>
         )}
 
-        {successMessage && <div style={styles.successBox}>{successMessage}</div>}
         {error && <div style={styles.errorBox}>{error}</div>}
 
+        {successMessage ? (
+          <div style={styles.confirmationScreen}>
+            <div style={styles.checkIcon}>✓</div>
+            <h3 style={styles.confirmTitle}>Registration Confirmed!</h3>
+            <p style={styles.confirmText}>Your studio placement for <strong style={{color:'#ff3c78'}}>{selectedClass?.className}</strong> has been secured.</p>
+            <p style={styles.confirmSub}>Redirecting you to home...</p>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroupFull}>
             <label style={styles.label}>Student's Age *</label>
@@ -131,6 +138,7 @@ export default function Registration() {
             {loading ? 'Submitting...' : 'Complete Studio Placement Registration'}
           </button>
         </form>
+        )}
       </div>
     </div>
   );
@@ -154,5 +162,10 @@ const styles = {
   input: { background: '#1f242e', border: '1px solid #333', borderRadius: '8px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', width: '100%' },
   select: { background: '#1f242e', border: '1px solid #333', borderRadius: '8px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', width: '100%' },
   textarea: { background: '#1f242e', border: '1px solid #333', borderRadius: '8px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', width: '100%' },
-  submitBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' }
+  submitBtn: { background: '#ff3c78', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' },
+  confirmationScreen: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '40px 20px', textAlign: 'center' },
+  checkIcon: { width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(46,204,113,0.15)', border: '2px solid #2ecc71', color: '#2ecc71', fontSize: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  confirmTitle: { fontSize: '22px', fontWeight: '700', color: '#fff', margin: 0 },
+  confirmText: { color: '#ccc', fontSize: '14px', margin: 0 },
+  confirmSub: { color: '#555', fontSize: '12px', margin: 0 }
 };

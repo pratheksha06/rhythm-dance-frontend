@@ -142,7 +142,7 @@ const styles = {
     display: 'flex', 
     justifyContent: 'center', 
     alignItems: 'center', 
-    minHeight: '100vh', 
+    minHeight: 'calc(100vh - 70px)', 
     backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('https://images.unsplash.com/photo-1511406584303-d34002996170?auto=format&fit=crop&q=80&w=1200')", 
     backgroundSize: 'cover',
     backgroundPosition: 'center',

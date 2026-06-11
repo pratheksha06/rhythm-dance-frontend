@@ -124,7 +124,7 @@ export default function Login() {
 }
 
 const loginStyles = {
-  container: { width: '100%', minHeight: '100vh', background: '#0a0a0a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Poppins', sans-serif" },
+  container: { width: '100%', minHeight: 'calc(100vh - 70px)', background: '#0a0a0a', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: "'Poppins', sans-serif", padding: '40px 20px', boxSizing: 'border-box' },
   card: { width: '100%', maxWidth: '420px', background: '#111', padding: '40px', borderRadius: '16px', border: '1px solid #222', boxSizing: 'border-box' },
   tabContainer: { display: 'flex', justifyContent: 'space-between', marginBottom: '30px', borderBottom: '1px solid #222' },
   tab: { flex: 1, background: 'transparent', border: 'none', padding: '12px 0', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' },
